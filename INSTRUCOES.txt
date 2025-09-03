@@ -1,16 +1,16 @@
 
-## Instruções para o Projeto Gestão de Projetos v2
+Instruções para o Projeto Gestão de Projetos v2
 
 Este projeto foi desenvolvido em Java com o framework Swing e utiliza o banco de dados MySQL para a persistência de dados.
 
-### Requisitos Necessários
+Requisitos Necessários
 
 Para executar este projeto, é necessário ter instalado:
 * **Apache NetBeans IDE 12 ou superior**
 * **JDK 8 ou superior**
 * **Servidor MySQL** (com MySQL Workbench ou similar)
 
-### Configuração do Banco de Dados
+Configuração do Banco de Dados
 
 Antes de rodar a aplicação, é essencial configurar o banco de dados.
 
