@@ -14,10 +14,10 @@ Configuração do Banco de Dados
 
 Antes de rodar a aplicação, é essencial configurar o banco de dados.
 
-1.  Abra o **MySQL Workbench** e faça login.
+1.  Abra o MySQL Workbench e faça login.
 2.  No painel esquerdo, localize a seção **SCHEMAS**.
 3.  Clique com o botão direito e selecione **"Create Schema..."** para criar um novo banco de dados.
-4.  Nomeie o banco de dados como **`projects`** (com 's' no final).
+4.  Nomeie o banco de dados como **projects** (com 's' no final).
 5.  Em uma nova aba de consulta (Query), copie e execute o comando SQL abaixo para criar a tabela necessária:
 
 CREATE TABLE projects (
