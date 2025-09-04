@@ -1,206 +1,76 @@
-package com.mycompany.gestaodeprojetosv2;
+package com.mycompany.gestaodeprojetosv2.controller;
 
-import com.mycompany.gestaodeprojetosv2.GestaoDeProjetosV2;
+import com.mycompany.gestaodeprojetosv2.model.Tarefa;
+import com.mycompany.gestaodeprojetosv2.util.ConnectionFactory;
+
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class TarefaDAO {
 
     public void save(Tarefa tarefa) {
-        String sql = "INSERT INTO tarefas ("
-                + "idProjeto, "
-                + "nome, "
-                + "descricao, "
-                + "observacoes, "
-                + "isCompleted, "
-                + "prazo, "
-                + "dataCriacao, "
-                + "dataAtualizacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
+        String sql = "INSERT INTO tasks (title, description, projectId, assignee, status, startDate, endDate, realStartDate, realEndDate, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Connection conn = null;
-        PreparedStatement statement = null;
+        PreparedStatement stmt = null;
 
         try {
-            conn = GestaoDeProjetosV2.getConnection();
-            statement = conn.prepareStatement(sql);
-            statement.setInt(1, tarefa.getIdProjeto());
-            statement.setString(2, tarefa.getNome());
-            statement.setString(3, tarefa.getDescricao());
-            statement.setString(4, tarefa.getObservacoes());
-            statement.setBoolean(5, tarefa.isIsCompleted());
-            statement.setDate(6, new java.sql.Date(tarefa.getPrazo().getTime()));
-            statement.setDate(7, new java.sql.Date(tarefa.getDataCriacao().getTime()));
-            statement.setDate(8, new java.sql.Date(tarefa.getDataAtualizacao().getTime()));
-            statement.execute();
+            conn = ConnectionFactory.getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, tarefa.getTitle());
+            stmt.setString(2, tarefa.getDescription());
+            stmt.setInt(3, tarefa.getProjectId());
+            stmt.setString(4, tarefa.getAssignee());
+            stmt.setString(5, tarefa.getStatus());
+            stmt.setDate(6, new Date(tarefa.getStartDate().getTime()));
+            stmt.setDate(7, new Date(tarefa.getEndDate().getTime()));
+            stmt.setDate(8, tarefa.getRealStartDate() != null ? new Date(tarefa.getRealStartDate().getTime()) : null);
+            stmt.setDate(9, tarefa.getRealEndDate() != null ? new Date(tarefa.getRealEndDate().getTime()) : null);
+            stmt.setDate(10, new Date(tarefa.getCreatedAt().getTime()));
+            stmt.execute();
         } catch (SQLException ex) {
-            throw new RuntimeException("Erro ao salvar a tarefa", ex);
+            throw new RuntimeException("Erro ao salvar a tarefa. " + ex.getMessage(), ex);
         } finally {
-            try {
-                if (statement != null) {
-                    statement.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                throw new RuntimeException("Erro ao fechar a conexão", ex);
-            }
+            ConnectionFactory.closeConnection(conn, stmt);
         }
     }
 
-    public void update(Tarefa tarefa) {
-        String sql = "UPDATE tarefas SET "
-                + "nome = ?, "
-                + "descricao = ?, "
-                + "observacoes = ?, "
-                + "isCompleted = ?, "
-                + "prazo = ?, "
-                + "dataAtualizacao = ? "
-                + "WHERE id = ?";
-
+    public List<Tarefa> getByProjectId(int projectId) {
+        String sql = "SELECT * FROM tasks WHERE projectId = ?";
         Connection conn = null;
-        PreparedStatement statement = null;
-
-        try {
-            conn = GestaoDeProjetosV2.getConnection();
-            statement = conn.prepareStatement(sql);
-            statement.setString(1, tarefa.getNome());
-            statement.setString(2, tarefa.getDescricao());
-            statement.setString(3, tarefa.getObservacoes());
-            statement.setBoolean(4, tarefa.isIsCompleted());
-            statement.setDate(5, new java.sql.Date(tarefa.getPrazo().getTime()));
-            statement.setDate(6, new java.sql.Date(tarefa.getDataAtualizacao().getTime()));
-            statement.setInt(7, tarefa.getId());
-            statement.execute();
-        } catch (SQLException ex) {
-            throw new RuntimeException("Erro ao atualizar a tarefa", ex);
-        } finally {
-            try {
-                if (statement != null) {
-                    statement.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                throw new RuntimeException("Erro ao fechar a conexão", ex);
-            }
-        }
-    }
-
-    public void delete(int idTarefa) {
-        String sql = "DELETE FROM tarefas WHERE id = ?";
-
-        Connection conn = null;
-        PreparedStatement statement = null;
-
-        try {
-            conn = GestaoDeProjetosV2.getConnection();
-            statement = conn.prepareStatement(sql);
-            statement.setInt(1, idTarefa);
-            statement.execute();
-        } catch (SQLException ex) {
-            throw new RuntimeException("Erro ao deletar a tarefa", ex);
-        } finally {
-            try {
-                if (statement != null) {
-                    statement.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                throw new RuntimeException("Erro ao fechar a conexão", ex);
-            }
-        }
-    }
-
-    public Tarefa getById(int idTarefa) {
-        String sql = "SELECT * FROM tarefas WHERE id = ?";
-
-        Connection conn = null;
-        PreparedStatement statement = null;
+        PreparedStatement stmt = null;
         ResultSet rs = null;
-        Tarefa tarefa = new Tarefa();
+        List<Tarefa> tarefas = new ArrayList<>();
 
         try {
-            conn = GestaoDeProjetosV2.getConnection();
-            statement = conn.prepareStatement(sql);
-            statement.setInt(1, idTarefa);
-            rs = statement.executeQuery();
-
-            if (rs.next()) {
-                tarefa.setId(rs.getInt("id"));
-                tarefa.setIdProjeto(rs.getInt("idProjeto"));
-                tarefa.setNome(rs.getString("nome"));
-                tarefa.setDescricao(rs.getString("descricao"));
-                tarefa.setObservacoes(rs.getString("observacoes"));
-                tarefa.setIsCompleted(rs.getBoolean("isCompleted"));
-                tarefa.setPrazo(rs.getDate("prazo"));
-                tarefa.setDataCriacao(rs.getDate("dataCriacao"));
-                tarefa.setDataAtualizacao(rs.getDate("dataAtualizacao"));
-            }
-        } catch (SQLException ex) {
-            throw new RuntimeException("Erro ao buscar a tarefa", ex);
-        } finally {
-            try {
-                if (statement != null) {
-                    statement.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                throw new RuntimeException("Erro ao fechar a conexão", ex);
-            }
-        }
-        return tarefa;
-    }
-
-    public List<Tarefa> getAll() {
-        String sql = "SELECT * FROM tarefas";
-
-        Connection conn = null;
-        PreparedStatement statement = null;
-        ResultSet rs = null;
-        List<Tarefa> tarefas = new ArrayList<Tarefa>();
-
-        try {
-            conn = GestaoDeProjetosV2.getConnection();
-            statement = conn.prepareStatement(sql);
-            rs = statement.executeQuery();
+            conn = ConnectionFactory.getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, projectId);
+            rs = stmt.executeQuery();
 
             while (rs.next()) {
                 Tarefa tarefa = new Tarefa();
                 tarefa.setId(rs.getInt("id"));
-                tarefa.setIdProjeto(rs.getInt("idProjeto"));
-                tarefa.setNome(rs.getString("nome"));
-                tarefa.setDescricao(rs.getString("descricao"));
-                tarefa.setObservacoes(rs.getString("observacoes"));
-                tarefa.setIsCompleted(rs.getBoolean("isCompleted"));
-                tarefa.setPrazo(rs.getDate("prazo"));
-                tarefa.setDataCriacao(rs.getDate("dataCriacao"));
-                tarefa.setDataAtualizacao(rs.getDate("dataAtualizacao"));
+                tarefa.setTitle(rs.getString("title"));
+                tarefa.setDescription(rs.getString("description"));
+                tarefa.setProjectId(rs.getInt("projectId"));
+                tarefa.setAssignee(rs.getString("assignee"));
+                tarefa.setStatus(rs.getString("status"));
+                tarefa.setStartDate(rs.getDate("startDate"));
+                tarefa.setEndDate(rs.getDate("endDate"));
+                tarefa.setRealStartDate(rs.getDate("realStartDate"));
+                tarefa.setRealEndDate(rs.getDate("realEndDate"));
+                tarefa.setCreatedAt(rs.getDate("createdAt"));
                 tarefas.add(tarefa);
             }
         } catch (SQLException ex) {
-            throw new RuntimeException("Erro ao buscar as tarefas", ex);
+            throw new RuntimeException("Erro ao buscar tarefas por projeto. " + ex.getMessage(), ex);
         } finally {
-            try {
-                if (statement != null) {
-                    statement.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                throw new RuntimeException("Erro ao fechar a conexão", ex);
-            }
+            ConnectionFactory.closeConnection(conn, stmt, rs);
         }
         return tarefas;
     }

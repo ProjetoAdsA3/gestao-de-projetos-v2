@@ -1,19 +1,26 @@
-package com.mycompany.gestaodeprojetosv2;
+package com.mycompany.gestaodeprojetosv2.model;
 
 import java.util.Date;
 
 public class Tarefa {
-    private int id;
-    private int idProjeto;
-    private String nome;
-    private String descricao;
-    private String observacoes;
-    private boolean isCompleted;
-    private Date prazo;
-    private Date dataCriacao;
-    private Date dataAtualizacao;
 
-    // Crie os construtores, getters e setters aqui (você pode gerar automaticamente no NetBeans com 'Cmd + Shift + G')
+    private int id;
+    private int projectId;
+    private String title;
+    private String description;
+    private String assignee;
+    private String status;
+    private Date startDate;
+    private Date endDate;
+    private Date realStartDate;
+    private Date realEndDate;
+    private Date createdAt;
+
+    public Tarefa() {
+        this.createdAt = new Date();
+    }
+    
+    // Getters e Setters
 
     public int getId() {
         return id;
@@ -23,67 +30,83 @@ public class Tarefa {
         this.id = id;
     }
 
-    public int getIdProjeto() {
-        return idProjeto;
+    public int getProjectId() {
+        return projectId;
     }
 
-    public void setIdProjeto(int idProjeto) {
-        this.idProjeto = idProjeto;
+    public void setProjectId(int projectId) {
+        this.projectId = projectId;
     }
 
-    public String getNome() {
-        return nome;
+    public String getTitle() {
+        return title;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public String getDescricao() {
-        return descricao;
+    public String getDescription() {
+        return description;
     }
 
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public String getObservacoes() {
-        return observacoes;
+    public String getAssignee() {
+        return assignee;
     }
 
-    public void setObservacoes(String observacoes) {
-        this.observacoes = observacoes;
+    public void setAssignee(String assignee) {
+        this.assignee = assignee;
     }
 
-    public boolean isIsCompleted() {
-        return isCompleted;
+    public String getStatus() {
+        return status;
     }
 
-    public void setIsCompleted(boolean isCompleted) {
-        this.isCompleted = isCompleted;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
-    public Date getPrazo() {
-        return prazo;
+    public Date getStartDate() {
+        return startDate;
     }
 
-    public void setPrazo(Date prazo) {
-        this.prazo = prazo;
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
-    public Date getDataCriacao() {
-        return dataCriacao;
+    public Date getEndDate() {
+        return endDate;
     }
 
-    public void setDataCriacao(Date dataCriacao) {
-        this.dataCriacao = dataCriacao;
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 
-    public Date getDataAtualizacao() {
-        return dataAtualizacao;
+    public Date getRealStartDate() {
+        return realStartDate;
     }
 
-    public void setDataAtualizacao(Date dataAtualizacao) {
-        this.dataAtualizacao = dataAtualizacao;
+    public void setRealStartDate(Date realStartDate) {
+        this.realStartDate = realStartDate;
+    }
+
+    public Date getRealEndDate() {
+        return realEndDate;
+    }
+
+    public void setRealEndDate(Date realEndDate) {
+        this.realEndDate = realEndDate;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 }

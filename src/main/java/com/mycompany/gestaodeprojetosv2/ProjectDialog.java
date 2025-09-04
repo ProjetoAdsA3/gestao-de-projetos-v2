@@ -1,87 +1,200 @@
 package com.mycompany.gestaodeprojetosv2;
 
-import com.mycompany.gestaodeprojetosv2.ProjetoDAO;
+import com.mycompany.gestaodeprojetosv2.controller.ProjetoDAO;
+import com.mycompany.gestaodeprojetosv2.controller.TeamDAO;
+import com.mycompany.gestaodeprojetosv2.model.Projeto;
+import com.mycompany.gestaodeprojetosv2.model.Team;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import java.util.List;
 
-public class ProjectDialog extends JFrame {
+public class ProjectDialog extends JDialog {
 
-    private JTextField nomeTextField;
-    private JTextArea descricaoTextArea;
-    private JButton salvarButton;
-    private JButton cancelarButton;
+    private JLabel labelNome;
+    private JTextField textFieldNome;
+    private JLabel labelDescricao;
+    private JTextArea textAreaDescricao;
+    private JLabel labelStatus;
+    private JComboBox<String> comboBoxStatus;
+    private JLabel labelGerente;
+    private JTextField textFieldGerente;
+    private JLabel labelDataInicio;
+    private JTextField textFieldDataInicio;
+    private JLabel labelDataTermino;
+    private JTextField textFieldDataTermino;
+    private JLabel labelEquipes;
+    private JList<Team> listEquipes;
+    private DefaultListModel<Team> listModelEquipes;
 
-    public ProjectDialog(MainScreen mainScreen) {
+    private JButton buttonSalvar;
+    private JButton buttonCancelar;
+
+    private ProjetoDAO projetoDAO;
+    private TeamDAO teamDAO;
+
+    public ProjectDialog(Frame owner) {
+        super(owner, "Adicionar Projeto", true);
+        this.projetoDAO = new ProjetoDAO();
+        this.teamDAO = new TeamDAO();
         initComponents();
-        this.setLocationRelativeTo(null);
+        this.setLocationRelativeTo(owner);
+        loadEquipes();
     }
 
     private void initComponents() {
-        // Inicialização dos componentes
-        nomeTextField = new JTextField();
-        descricaoTextArea = new JTextArea();
-        salvarButton = new JButton("Salvar");
-        cancelarButton = new JButton("Cancelar");
+        setSize(500, 600);
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        
+        // Nome do Projeto
+        gbc.gridx = 0; gbc.gridy = 0;
+        labelNome = new JLabel("Nome do Projeto:");
+        add(labelNome, gbc);
+        gbc.gridx = 1; gbc.gridy = 0;
+        textFieldNome = new JTextField(30);
+        add(textFieldNome, gbc);
 
-        // Configuração do layout
-        JPanel panel = new JPanel(null);
-        JLabel nomeLabel = new JLabel("Nome do Projeto:");
-        JLabel descricaoLabel = new JLabel("Descrição:");
+        // Descrição
+        gbc.gridx = 0; gbc.gridy = 1;
+        labelDescricao = new JLabel("Descrição:");
+        add(labelDescricao, gbc);
+        gbc.gridx = 1; gbc.gridy = 1;
+        gbc.gridheight = 2;
+        textAreaDescricao = new JTextArea(5, 30);
+        textAreaDescricao.setLineWrap(true);
+        textAreaDescricao.setWrapStyleWord(true);
+        JScrollPane scrollDescricao = new JScrollPane(textAreaDescricao);
+        add(scrollDescricao, gbc);
+        gbc.gridheight = 1;
 
-        nomeLabel.setBounds(20, 20, 120, 25);
-        nomeTextField.setBounds(150, 20, 200, 25);
+        // Status
+        gbc.gridx = 0; gbc.gridy = 3;
+        labelStatus = new JLabel("Status:");
+        add(labelStatus, gbc);
+        gbc.gridx = 1; gbc.gridy = 3;
+        String[] statusOptions = {"Planejado", "Em Andamento", "Concluído", "Cancelado"};
+        comboBoxStatus = new JComboBox<>(statusOptions);
+        add(comboBoxStatus, gbc);
+        
+        // Gerente
+        gbc.gridx = 0; gbc.gridy = 4;
+        labelGerente = new JLabel("Gerente:");
+        add(labelGerente, gbc);
+        gbc.gridx = 1; gbc.gridy = 4;
+        textFieldGerente = new JTextField(30);
+        add(textFieldGerente, gbc);
+        
+        // Datas
+        gbc.gridx = 0; gbc.gridy = 5;
+        labelDataInicio = new JLabel("Data de Início:");
+        add(labelDataInicio, gbc);
+        gbc.gridx = 1; gbc.gridy = 5;
+        textFieldDataInicio = new JTextField(30);
+        add(textFieldDataInicio, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 6;
+        labelDataTermino = new JLabel("Data de Término:");
+        add(labelDataTermino, gbc);
+        gbc.gridx = 1; gbc.gridy = 6;
+        textFieldDataTermino = new JTextField(30);
+        add(textFieldDataTermino, gbc);
 
-        descricaoLabel.setBounds(20, 60, 120, 25);
-        descricaoTextArea.setBounds(150, 60, 200, 100);
+        // Equipes
+        gbc.gridx = 0; gbc.gridy = 7;
+        labelEquipes = new JLabel("Equipes (Ctrl+clique para selecionar):");
+        add(labelEquipes, gbc);
+        gbc.gridx = 1; gbc.gridy = 7;
+        gbc.gridheight = 4;
+        listModelEquipes = new DefaultListModel<>();
+        listEquipes = new JList<>(listModelEquipes);
+        listEquipes.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Team) {
+                    Team team = (Team) value;
+                    setText(team.getName() + " (" + team.getDescription() + ")");
+                }
+                return this;
+            }
+        });
+        JScrollPane scrollEquipes = new JScrollPane(listEquipes);
+        add(scrollEquipes, gbc);
+        gbc.gridheight = 1;
 
-        salvarButton.setBounds(20, 180, 100, 30);
-        cancelarButton.setBounds(150, 180, 100, 30);
+        // Botões
+        gbc.gridx = 0; gbc.gridy = 11;
+        gbc.gridwidth = 2;
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonSalvar = new JButton("Salvar");
+        buttonCancelar = new JButton("Cancelar");
+        buttonPanel.add(buttonSalvar);
+        buttonPanel.add(buttonCancelar);
+        add(buttonPanel, gbc);
 
-        panel.add(nomeLabel);
-        panel.add(nomeTextField);
-        panel.add(descricaoLabel);
-        panel.add(descricaoTextArea);
-        panel.add(salvarButton);
-        panel.add(cancelarButton);
-
-        add(panel);
-
-        // Configurações da janela
-        setTitle("Novo Projeto");
-        setSize(400, 250);
-        setResizable(false);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
-        // Ação do botão Salvar
-        salvarButton.addActionListener(new ActionListener() {
+        // Ações dos botões
+        buttonSalvar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Lógica para salvar o projeto
-                Projeto projeto = new Projeto();
-                projeto.setNome(nomeTextField.getText());
-                projeto.setDescricao(descricaoTextArea.getText());
-                
-                ProjetoDAO projetoDAO = new ProjetoDAO();
-                projetoDAO.save(projeto);
+                salvarProjeto();
+            }
+        });
 
-                JOptionPane.showMessageDialog(null, "Projeto salvo com sucesso!");
+        buttonCancelar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
                 dispose();
             }
         });
+    }
 
-        // Ação do botão Cancelar
-        cancelarButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose(); // Fecha a janela
+    private void loadEquipes() {
+        try {
+            List<Team> teams = teamDAO.getAll();
+            for (Team t : teams) {
+                listModelEquipes.addElement(t);
             }
-        });
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar equipes: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
+    }
+
+    private void salvarProjeto() {
+        try {
+            String nome = textFieldNome.getText();
+            String descricao = textAreaDescricao.getText();
+            String status = (String) comboBoxStatus.getSelectedItem();
+            String gerente = textFieldGerente.getText();
+            String dataInicio = textFieldDataInicio.getText();
+            String dataTermino = textFieldDataTermino.getText();
+            List<Team> equipesSelecionadas = listEquipes.getSelectedValuesList();
+
+            if (nome.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "O nome do projeto é obrigatório.", "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            Projeto projeto = new Projeto();
+            projeto.setNome(nome);
+            projeto.setDescricao(descricao);
+            projeto.setStatus(status);
+            projeto.setGerenteResponsavel(gerente);
+            projeto.setDataInicio(dataInicio);
+            projeto.setDataTermino(dataTermino);
+            projeto.setEquipes(equipesSelecionadas);
+
+            projetoDAO.save(projeto);
+            JOptionPane.showMessageDialog(this, "Projeto salvo com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            dispose();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erro ao salvar projeto: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
     }
 }

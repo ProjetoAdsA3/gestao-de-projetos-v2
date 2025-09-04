@@ -11,9 +11,9 @@ public class GestaoDeProjetosV2 {
     // O parâmetro 'projects' é o nome do seu banco de dados.
     private static final String DATABASE_URL = "jdbc:mysql://localhost:3306/projects?useTimezone=true&serverTimezone=UTC";
     // O nome de usuário para acessar o banco de dados.
-    private static final String DATABASE_USER = "root";
+    private static final String DATABASE_USER = "professor";
     // A senha do usuário. ATENÇÃO: Em projetos reais, a senha não deve ser codificada diretamente aqui.
-    private static final String DATABASE_PASSWORD = "58919811Ana!";
+    private static final String DATABASE_PASSWORD = "prof2025";
 
     // --- Método de Conexão ---
     // Este método estático retorna uma nova conexão com o banco de dados.
